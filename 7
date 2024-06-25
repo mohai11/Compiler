@@ -1,0 +1,163 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+int nop;
+vector<string> production;
+unordered_map<char, set<char>> first_sets;
+
+void addToResult(set<char>& res, char val)
+{
+    res.insert(val);
+}
+
+void computeFIRST(char c, set<char>& res)
+{
+    if (!isupper(c))
+    {
+        addToResult(res, c);
+        return;
+    }
+    for (const auto& prod : production)
+    {
+        if (prod[0] == c)
+        {
+            if (prod[2] == '$')
+            {
+                addToResult(res, '$');
+            }
+            else
+            {
+                for (size_t j = 2; j < prod.size(); ++j)
+                {
+                    set<char> subres;
+                    computeFIRST(prod[j], subres);
+                    res.insert(subres.begin(), subres.end());
+                    if (subres.find('$') == subres.end())
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+set<char> FIRST(char c)
+{
+    if (first_sets.find(c) != first_sets.end())
+    {
+        return first_sets[c];
+    }
+    set<char> res;
+    computeFIRST(c, res);
+    first_sets[c] = res;
+    return res;
+}
+
+unordered_map<char, set<char>> follow_sets;
+
+void computeFOLLOW(char c, set<char>& res)
+{
+    if (production[0][0] == c)
+    {
+        addToResult(res, '$');
+    }
+    for (const auto& prod : production)
+    {
+        for (size_t j = 2; j < prod.size(); ++j)
+        {
+            if (prod[j] == c)
+            {
+                if (j + 1 < prod.size())
+                {
+                    set<char> first_next = FIRST(prod[j + 1]);
+                    res.insert(first_next.begin(), first_next.end());
+                    res.erase('$');
+                    if (first_next.find('$') != first_next.end() && prod[0] != c)
+                    {
+                        if (follow_sets.find(prod[0]) == follow_sets.end())
+                        {
+                            set<char> follow_lhs;
+                            computeFOLLOW(prod[0], follow_lhs);
+                            res.insert(follow_lhs.begin(), follow_lhs.end());
+                        }
+                        else
+                        {
+                            res.insert(follow_sets[prod[0]].begin(), follow_sets[prod[0]].end());
+                        }
+                    }
+                }
+                else if (prod[0] != c)
+                {
+                    if (follow_sets.find(prod[0]) == follow_sets.end())
+                    {
+                        set<char> follow_lhs;
+                        computeFOLLOW(prod[0], follow_lhs);
+                        res.insert(follow_lhs.begin(), follow_lhs.end());
+                    }
+                    else
+                    {
+                        res.insert(follow_sets[prod[0]].begin(), follow_sets[prod[0]].end());
+                    }
+                }
+            }
+        }
+    }
+}
+
+set<char> FOLLOW(char c)
+{
+    if (follow_sets.find(c) != follow_sets.end())
+    {
+        return follow_sets[c];
+    }
+    set<char> res;
+    computeFOLLOW(c, res);
+    follow_sets[c] = res;
+    return res;
+}
+
+int main()
+{
+    cout << "Enter the number of production rules: ";
+    cin >> nop;
+    production.resize(nop);
+    cout << "Enter the production rules:\n";
+    for (int i = 0; i < nop; ++i)
+    {
+        cin >> production[i];
+    }
+
+    char choice;
+    do
+    {
+        char c;
+        cout << "\nFind the FIRST of --> ";
+        cin >> c;
+        set<char> first_res = FIRST(c);
+        cout << "FIRST(" << c << ") = { ";
+        for (char ch : first_res)
+        {
+            cout << ch << " ";
+        }
+        cout << "}\n";
+
+        cout << "Find the FOLLOW of --> ";
+        cin >> c;
+        set<char> follow_res = FOLLOW(c);
+        cout << "FOLLOW(" << c << ") = { ";
+        for (char ch : follow_res)
+        {
+            cout << ch << " ";
+        }
+        cout << "}\n";
+
+        cout << "Press 'y' to continue: ";
+        cin >> choice;
+    }
+    while (choice == 'y' || choice == 'Y');
+
+    return 0;
+}
+
