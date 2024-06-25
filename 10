@@ -1,0 +1,136 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+char a[10];
+int top = -1, i;
+
+void error()
+{
+    cout << "Syntax Error" << endl;
+}
+
+void push(const char k[])
+{
+    for (i = 0; k[i] != '\0'; i++)
+    {
+        if (top < 9)
+            a[++top] = k[i];
+    }
+}
+
+char TOS()
+{
+    return a[top];
+}
+
+void pop()
+{
+    if (top >= 0)
+        a[top--] = '\0';
+}
+
+void display()
+{
+    for (i = 0; i <= top; i++)
+        cout << a[i];
+}
+
+void display1(const char p[], int m)
+{
+    cout << "\t";
+    for (int l = m; p[l] != '\0'; l++)
+        cout << p[l];
+}
+
+char* Stack()
+{
+    return a;
+}
+
+int main()
+{
+    char ip[20], r[20], nt, c;
+    int ir, ic, j = 0, k;
+    const char* t[5][6] =
+    {
+        {"$", "$", "TH", "$", "TH", "$"},
+        {"+TH", "$", "$", "e", "$", "e"},
+        {"$", "$", "FU", "$", "FU", "$"},
+        {"e", "*FU", "$", "e", "$", "e"},
+        {"$", "$", "(E)", "$", "i", "$"}
+    };
+
+    cout << "\nEnter a String (add $ at the end): ";
+    cin.getline(ip, 20);
+    cout << "Stack\tInput\tOutput\n";
+    cout << "-----\t-----\t------\n\n";
+    push("$E");
+    display();
+    cout << "\t" << ip << "\n";
+    for (j = 0; ip[j] != '\0';)
+    {
+        if (TOS() == c)
+        {
+            pop();
+            display();
+            display1(ip, j + 1);
+            cout << "\tPOP\n";
+            j++;
+        }
+        c = ip[j];
+        nt = TOS();
+        if (nt == 'E') ir = 0;
+        else if (nt == 'H') ir = 1;
+        else if (nt == 'T') ir = 2;
+        else if (nt == 'U') ir = 3;
+        else if (nt == 'F') ir = 4;
+        else
+        {
+            error();
+            break;
+        }
+        if (c == '+') ic = 0;
+        else if (c == '*') ic = 1;
+        else if (c == '(') ic = 2;
+        else if (c == ')') ic = 3;
+        else if (isalpha(c))
+        {
+            ic = 4;
+            c = 'i';
+        }
+        else if (c == '$') ic = 5;
+        strcpy(r, t[ir][ic]);
+        reverse(r, r + strlen(r));
+        pop();
+        push(r);
+        if (TOS() == 'e')
+        {
+            pop();
+            display();
+            display1(ip, j);
+            cout << "\t" << nt << "->"<<char(238)<<endl;
+        }
+        else
+        {
+            display();
+            display1(ip, j);
+            cout << "\t" << nt << "->" << t[ir][ic] << "\n";
+        }
+
+        if (TOS() == '$' && c == '$')
+            break;
+        if (TOS() == '$')
+        {
+            error();
+            break;
+        }
+    }
+    k = strcmp(Stack(), "$");
+    if (k == 0)
+        cout << "\n Given String is accepted" << endl;
+    else
+        cout << "\n Given String is not accepted" << endl;
+
+    return 0;
+}
