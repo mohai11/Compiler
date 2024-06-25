@@ -1,0 +1,82 @@
+#include<bits/stdc++.h>
+
+using namespace std;
+
+int nop;
+vector<string> production;
+
+void result(set<char>& res, char val)
+{
+    res.insert(val);
+}
+
+void FIRST(set<char>& res, char c)
+{
+    if (!isupper(c))
+    {
+        result(res, c);
+        return;
+    }
+    for (int i = 0; i < nop; i++)
+    {
+        if (production[i][0] == c)
+        {
+            if (production[i][2] == '$')
+            {
+                result(res, '$');
+            }
+            else
+            {
+                for (size_t j = 2; j < production[i].size(); j++)
+                {
+                    set<char> subres;
+                    FIRST(subres, production[i][j]);
+                    res.insert(subres.begin(), subres.end());
+                    if (subres.find('$') == subres.end())
+                    {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+int main()
+{
+    int i;
+    char choice;
+    char c;
+
+    cout << "Number of production rules: ";
+    cin >> nop;
+    production.resize(nop);
+    for (i = 0; i < nop; i++)
+    {
+        cin >> production[i];
+    }
+
+    do
+    {
+        cout << "\n Find the FIRST of :";
+        cin >> c;
+        set<char> res;
+        FIRST(res, c);
+        cout << "\n FIRST(" << c << ")= { ";
+        int n=res.size(),i=1;
+        for (char ch : res)
+        {
+            if(i<n)
+                cout << ch << ",";
+            else
+                cout << ch << " ";
+            i++;
+        }
+        cout << "}\n";
+        cout << "press 'y' to continue : ";
+        cin >> choice;
+    }
+    while (choice == 'y' || choice == 'Y');
+
+    return 0;
+}
